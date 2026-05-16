@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Popaisle.com</title>
+  <link rel="icon" type="image/png" sizes="64x64" href="/favicon-64.png?v=20260427b" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-64.png?v=20260427b" />
+  <link rel="shortcut icon" type="image/png" href="/favicon.ico?v=20260427b" />
+  <link rel="apple-touch-icon" href="/favicon-64.png?v=20260427b" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Sora:wght@500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --ink: #0f172a;
+      --muted: #475569;
+      --accent: #d3b884;
+      --accent-2: #e5cda0;
+      --border: #e2e8f0;
+      --aisle-door-dark-top: rgba(54, 46, 68, 0.98);
+      --aisle-door-dark-bottom: rgba(23, 19, 31, 0.99);
+      --aisle-door-cream-top: rgba(246, 231, 198, 0.99);
+      --aisle-door-cream-bottom: rgba(211, 184, 132, 0.99);
+      --background: radial-gradient(circle at 20% 20%, rgba(211,184,132,0.10), transparent 42%), radial-gradient(circle at 78% 0%, rgba(229,205,160,0.10), transparent 46%), #fff7e8;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: var(--background);
+      font-family: "Space Grotesk", "Sora", system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      min-height: 100dvh;
+      position: relative;
+      padding: 0;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    .page-viewport {
+      position: relative;
+      z-index: 2;
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      box-sizing: border-box;
+    }
+
+    .page-shell {
+      width: min(92vw, 560px);
+      display: grid;
+      justify-items: center;
+      gap: 18px;
+      text-align: center;
+      position: relative;
+      transform-origin: center center;
+      will-change: transform;
+    }
+
+    .login-aisle-scene {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+      perspective: 1400px;
+    }
+
+    .login-aisle-scene::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at center, rgba(247, 245, 255, 0) 0 24%, rgba(247, 245, 255, 0.76) 42%, rgba(247, 245, 255, 0.96) 64%, rgba(247, 245, 255, 1) 100%);
+    }
+
+    .aisle-wall {
+      position: absolute;
+      top: clamp(72px, 8vh, 110px);
+      bottom: clamp(72px, 8vh, 110px);
+      width: clamp(120px, 22vw, 320px);
+      background: transparent;
+      box-shadow: none;
+      transform-origin: bottom center;
+      opacity: 0.82;
+      filter: none;
+      overflow: visible;
+    }
+
+    .aisle-wall.left {
+      left: clamp(4px, 13vw, 23vw);
+      clip-path: polygon(0 100%, 0 10%, 58% 0, 100% 3%, 54% 100%);
+      transform: rotateY(34deg) rotateZ(-4deg) scale(clamp(0.46, 0.6 + 0.16vw, 0.72));
+    }
+
+    .aisle-wall.right {
+      right: clamp(4px, 13vw, 23vw);
+      clip-path: polygon(46% 100%, 0 3%, 42% 0, 100% 10%, 100% 100%);
+      transform: rotateY(-34deg) rotateZ(4deg) scale(clamp(0.46, 0.6 + 0.16vw, 0.72));
+    }
+
+    .aisle-door {
+      border-radius: 12px 12px 4px 4px;
+      background: linear-gradient(180deg, var(--aisle-door-dark-top), var(--aisle-door-dark-bottom));
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,0.06);
+      position: absolute;
+      display: grid;
+      place-items: center;
+      color: rgba(255, 252, 244, 0.88);
+      font-size: clamp(7px, 0.74vw, 13px);
+      font-weight: 800;
+      line-height: 1.05;
+      text-align: center;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.46);
+    }
+
+    .aisle-door.open {
+      background: linear-gradient(180deg, var(--aisle-door-cream-top), var(--aisle-door-cream-bottom));
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,0.34), 0 10px 20px rgba(115, 78, 28, 0.12);
+      color: rgba(76, 49, 24, 0.94);
+      text-shadow: 0 1px 1px rgba(255,255,255,0.46);
+    }
+
+    .aisle-door::before {
+      content: "";
+      position: absolute;
+      inset: 8% 10%;
+      border-radius: 9px 9px 3px 3px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0.04));
+      z-index: 0;
+    }
+
+    .aisle-door::after {
+      content: "";
+      position: absolute;
+      top: 48%;
+      right: 10%;
+      width: max(1.5px, 8%);
+      height: max(1.5px, 8%);
+      border-radius: 999px;
+      background: rgba(248, 246, 255, 0.82);
+      box-shadow: none;
+      z-index: 2;
+    }
+
+    .aisle-wall.left .aisle-door:nth-child(13),
+    .aisle-wall.left .aisle-door:nth-child(14),
+    .aisle-wall.right .aisle-door:nth-child(13),
+    .aisle-wall.right .aisle-door:nth-child(14) {
+      background: linear-gradient(180deg, rgba(62, 53, 76, 0.98), rgba(24, 19, 33, 0.99));
+      box-shadow: none;
+      filter: none;
+      outline: none;
+    }
+
+    .aisle-wall.left .aisle-door:nth-child(13)::before,
+    .aisle-wall.left .aisle-door:nth-child(14)::before,
+    .aisle-wall.right .aisle-door:nth-child(13)::before,
+    .aisle-wall.right .aisle-door:nth-child(14)::before {
+      opacity: 0;
+    }
+
+    .aisle-wall.left .aisle-door:nth-child(13)::after,
+    .aisle-wall.left .aisle-door:nth-child(14)::after,
+    .aisle-wall.right .aisle-door:nth-child(13)::after,
+    .aisle-wall.right .aisle-door:nth-child(14)::after {
+      box-shadow: none;
+    }
+
+    .aisle-wall.left .aisle-door:nth-child(1)  { left: 6%;  bottom: 34%; width: 38%; height: 24%; }
+    .aisle-wall.left .aisle-door:nth-child(2)  { left: 20%; bottom: 59%; width: 29%; height: 18.8%; }
+    .aisle-wall.left .aisle-door:nth-child(3)  { left: 31%; bottom: 79%; width: 23%; height: 15%; }
+    .aisle-wall.right .aisle-door:nth-child(1) { right: 6%;  bottom: 34%; width: 38%; height: 24%; }
+    .aisle-wall.right .aisle-door:nth-child(2) { right: 20%; bottom: 59%; width: 29%; height: 18.8%; }
+    .aisle-wall.right .aisle-door:nth-child(3) { right: 31%; bottom: 79%; width: 23%; height: 15%; }
+
+    .aisle-door.open:nth-child(odd) {
+      filter: brightness(1.03);
+    }
+
+    .aisle-door span {
+      position: relative;
+      z-index: 1;
+      display: block;
+      max-width: 82%;
+      overflow-wrap: anywhere;
+    }
+
+    .rosewood-wordmark {
+      position: fixed;
+      top: clamp(18px, 4vh, 46px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      width: min(54vw, 520px);
+      margin: 0;
+      color: #3e2714;
+      font-family: "Sora", "Space Grotesk", system-ui, -apple-system, sans-serif;
+      font-size: clamp(32px, 4.6vw, 58px);
+      font-weight: 800;
+      line-height: 0.95;
+      letter-spacing: 0;
+      text-shadow: 0 10px 26px rgba(91, 61, 25, 0.16);
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    label {
+      font-weight: 600;
+      color: var(--ink);
+      font-size: 14px;
+    }
+
+    input {
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: "Space Grotesk", "Sora", system-ui, sans-serif;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      background: #fff;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(211,184,132,0.2);
+    }
+    .password-field-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .password-field-wrap input {
+      width: 100%;
+      padding-right: 46px;
+    }
+    .password-visibility-btn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: transparent;
+      color: rgb(133, 60, 172);
+      cursor: pointer;
+      border-radius: 999px;
+      padding: 0;
+    }
+    .password-visibility-btn:hover {
+      background: rgba(211,184,132,0.10);
+    }
+    .password-visibility-btn:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(211,184,132,0.18);
+    }
+    .password-visibility-btn svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
+    button {
+      font-family: "Space Grotesk", "Sora", system-ui, sans-serif;
+    }
+
+    #progress-bar {
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+
+    .login-card {
+      width: min(100%, 320px);
+      display: grid;
+      gap: 12px;
+      margin: 0 auto;
+      text-align: left;
+      transform: translateX(0);
+    }
+    .login-actions-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: -2px;
+    }
+    .login-enter-btn {
+      background: #3e2714;
+      color: #fff7e8;
+      border: none;
+      border-radius: 10px;
+      padding: 9px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(62, 39, 20, 0.22);
+      justify-self: auto;
+    }
+
+    @media (max-width: 900px) {
+      .aisle-wall {
+        width: clamp(100px, 18vw, 220px);
+        opacity: 0.52;
+      }
+      .aisle-wall.left {
+        left: max(-24px, 8vw);
+      }
+      .aisle-wall.right {
+        right: max(-24px, 8vw);
+      }
+      .login-actions-row {
+        flex-wrap: wrap;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page-viewport {
+        padding: 12px;
+      }
+      .aisle-wall {
+        width: clamp(72px, 18vw, 132px);
+        top: 16vh;
+        bottom: 16vh;
+        opacity: 0.34;
+      }
+      .rosewood-wordmark {
+        font-size: clamp(26px, 7.2vw, 42px);
+      }
+      .aisle-wall.left {
+        left: -18px;
+      }
+      .aisle-wall.right {
+        right: -18px;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="page-viewport">
+  <h1 class="rosewood-wordmark">Rosewood Hotels</h1>
+  <div class="login-aisle-scene" aria-hidden="true">
+    <div class="aisle-wall left">
+      <div class="aisle-door open"><span>Room 1</span></div>
+      <div class="aisle-door"><span>Room 2</span></div>
+      <div class="aisle-door open"><span>Room 3</span></div>
+    </div>
+    <div class="aisle-wall right">
+      <div class="aisle-door"><span>Room 4</span></div>
+      <div class="aisle-door open"><span>Room 5</span></div>
+      <div class="aisle-door"><span>Room 6</span></div>
+    </div>
+  </div>
+  <div class="page-shell">
+    <form id="login-form" class="login-card" autocomplete="on" method="post" action="/auth/ws-login-complete">
+    <label style="display: grid; gap: 6px; font-weight: 600; color: #3e2714;">
+      Username
+      <input id="email" name="email" type="email" placeholder="Enter your email"
+             autocomplete="username" autocapitalize="none" spellcheck="false" inputmode="email" required>
+    </label>
+    <label style="display: grid; gap: 6px; font-weight: 600; color: #3e2714; margin-top: 10px;">
+      Password
+      <div class="password-field-wrap">
+        <input id="current-password" name="password" type="password" placeholder="Enter your password"
+               autocomplete="current-password" required>
+        <button id="toggle-password-visibility" class="password-visibility-btn" type="button" aria-label="Show password" aria-pressed="false" title="Show password">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M2.5 12C4.7 7.8 8.03 5.7 12 5.7S19.3 7.8 21.5 12c-2.2 4.2-5.53 6.3-9.5 6.3S4.7 16.2 2.5 12Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="12" cy="12" r="3.1" stroke="currentColor" stroke-width="1.8"/>
+          </svg>
+        </button>
+      </div>
+    </label>
+    <div class="login-actions-row">
+      <button id="enter-btn" class="login-enter-btn" type="submit">Enter</button>
+      <a id="forgot-link" href="#" style="font-size: 12px; color: rgb(133, 60, 172); text-decoration: none;">Forgot Something ?</a>
+    </div>
+    <div id="status" style="min-height: 24px; font-size: 14px; color: #3e2714;"></div>
+    <div id="progress" style="height: 6px; background: #e2e8f0; border-radius: 999px; overflow: hidden; display: none;">
+      <div id="progress-bar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #d3b884, #38bdf8); transition: width 0.3s;"></div>
+    </div>
+  </form>
+  </div>
+  </div>
+
+  <div id="recovery-backdrop" style="position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.35); z-index: 999;" role="dialog" aria-modal="true" aria-labelledby="recovery-title">
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px 24px; width: 360px; max-width: 90vw; box-shadow: 0 14px 28px rgba(43, 15, 63, 0.12); display: grid; gap: 16px;">
+      <div style="font-weight: 700; color: #3e2714; font-size: 14px;" id="recovery-title">Account recovery</div>
+      <div style="font-size: 12px; color: #475569; line-height: 1.5;">Enter your email address to start recovery.</div>
+      <input id="recovery-input" type="email" name="recovery_email" placeholder="Enter your email address" autocomplete="off" autocapitalize="none" autocorrect="off" inputmode="email" spellcheck="false" aria-autocomplete="none" data-lpignore="true" data-1p-ignore="true" data-form-type="other" style="-webkit-appearance: none; -moz-appearance: textfield; appearance: none; background-image: none;">
+      <div id="recovery-status" style="min-height: 18px; font-size: 12px; color: #5f3f22;"></div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 4px;">
+        <button id="recovery-cancel" type="button" style="background: #e2e8f0; color: #1f2937; border: none; border-radius: 10px; padding: 10px 14px; font-size: 14px; cursor: pointer;">Cancel</button>
+        <button id="recovery-submit" type="button" style="background: linear-gradient(120deg, #d3b884, #e5cda0); color: #ffffff; border: none; border-radius: 10px; padding: 10px 14px; font-size: 14px; cursor: pointer; box-shadow: 0 10px 20px rgba(211,184,132,0.24);">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const pageShell = document.querySelector(".page-shell");
+    const pageViewport = document.querySelector(".page-viewport");
+    function fitLandingShell() {
+      if (!pageShell || !pageViewport) return;
+      pageShell.style.transform = "scale(1)";
+      const viewportRect = pageViewport.getBoundingClientRect();
+      const shellRect = pageShell.getBoundingClientRect();
+      if (!viewportRect.width || !viewportRect.height || !shellRect.width || !shellRect.height) return;
+      const widthScale = viewportRect.width / shellRect.width;
+      const heightScale = viewportRect.height / shellRect.height;
+      const scale = Math.min(1, widthScale, heightScale);
+      pageShell.style.transform = `scale(${Math.max(0.72, scale).toFixed(4)})`;
+    }
+    window.addEventListener("resize", fitLandingShell, { passive: true });
+    window.addEventListener("load", fitLandingShell);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(fitLandingShell);
+    });
+
+    // Clear fields on load; keep only encrypted values in sessionStorage (per-tab).
+    const userEl = document.getElementById("email");
+    const passEl = document.getElementById("current-password");
+    const loginForm = document.getElementById("login-form");
+    const statusEl = document.getElementById("status");
+    const progress = document.getElementById("progress");
+    const progressBar = document.getElementById("progress-bar");
+    const forgotLink = document.getElementById("forgot-link");
+    const recoveryBackdrop = document.getElementById("recovery-backdrop");
+    const recoveryInput = document.getElementById("recovery-input");
+    const recoveryStatus = document.getElementById("recovery-status");
+    const recoveryCancel = document.getElementById("recovery-cancel");
+    const recoverySubmit = document.getElementById("recovery-submit");
+    const togglePasswordBtn = document.getElementById("toggle-password-visibility");
+    const LOGIN_RETRY_RESET_KEY = "popaisle.login_retry_reset";
+    function resolveBrowserSessionId() {
+      try { localStorage.removeItem("browser_session_id"); } catch {}
+      let tabId = "";
+      const bytes = new Uint8Array(8);
+      if (window.crypto && window.crypto.getRandomValues) {
+        window.crypto.getRandomValues(bytes);
+        tabId = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+      } else {
+        tabId = String(Date.now()) + Math.random().toString(16).slice(2);
+      }
+      try { sessionStorage.setItem("browser_session_id", tabId); } catch {}
+      return { value: tabId, source: "generated" };
+    }
+    const resolvedBrowserSession = resolveBrowserSessionId();
+    let browserSessionId = String(resolvedBrowserSession && resolvedBrowserSession.value || "").trim();
+    console.log("[login] browser_session_id", {
+      value: browserSessionId,
+      source: String(resolvedBrowserSession && resolvedBrowserSession.source || "unknown")
+    });
+    let pendingRetryReset = null;
+    try {
+      const rawRetryReset = sessionStorage.getItem(LOGIN_RETRY_RESET_KEY);
+      if (rawRetryReset) {
+        pendingRetryReset = JSON.parse(rawRetryReset);
+        sessionStorage.removeItem(LOGIN_RETRY_RESET_KEY);
+      }
+    } catch {}
+    userEl.disabled = false;
+    passEl.disabled = false;
+    sessionStorage.removeItem("enc_username");
+    sessionStorage.removeItem("enc_password");
+    if (pendingRetryReset && pendingRetryReset.clearPassword !== false) {
+      passEl.value = "";
+    }
+    if (pendingRetryReset && pendingRetryReset.clearUsername === true) {
+      userEl.value = "";
+    }
+    const focusRetryField = () => {
+      const requestedField = String(pendingRetryReset && pendingRetryReset.focus || "").trim().toLowerCase();
+      const target =
+        requestedField === "username" || !userEl.value.trim()
+          ? userEl
+          : passEl;
+      try { target.focus(); } catch {}
+      try { target.setSelectionRange(0, String(target.value || "").length); } catch {}
+    };
+    if (pendingRetryReset) {
+      window.requestAnimationFrame(() => {
+        window.setTimeout(focusRetryField, 60);
+      });
+    }
+    if (loginForm) {
+      loginForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        maybeSend(true);
+      });
+    }
+    function refreshPasswordVisibilityButton() {
+      if (!togglePasswordBtn) return;
+      const showingPassword = passEl.type === "text";
+      togglePasswordBtn.setAttribute("aria-pressed", showingPassword ? "true" : "false");
+      togglePasswordBtn.setAttribute("aria-label", showingPassword ? "Hide password" : "Show password");
+      togglePasswordBtn.title = showingPassword ? "Hide password" : "Show password";
+    }
+    if (togglePasswordBtn) {
+      togglePasswordBtn.addEventListener("click", () => {
+        const showingPassword = passEl.type === "text";
+        passEl.type = showingPassword ? "password" : "text";
+        refreshPasswordVisibilityButton();
+        try { passEl.focus(); } catch {}
+      });
+      refreshPasswordVisibilityButton();
+    }
+
+    async function maybeStorePasswordCredential() {
+      const safeUser = String(userEl && userEl.value || "").trim();
+      const safePass = String(passEl && passEl.value || "");
+      if (!safeUser || !safePass) return;
+      if (!("credentials" in navigator) || !navigator.credentials || typeof navigator.credentials.store !== "function") return;
+      if (!("PasswordCredential" in window)) return;
+      try {
+        const credential = new PasswordCredential({
+          id: safeUser,
+          password: safePass,
+          name: safeUser,
+        });
+        await navigator.credentials.store(credential);
+      } catch (err) {
+        console.warn("[Popaisle] Browser password-manager store skipped:", err);
+      }
+    }
+
+    function markLoginSuccessForPasswordManagers() {
+      if (!loginForm) return;
+      loginForm.setAttribute("data-login-state", "success");
+      loginForm.setAttribute("aria-busy", "false");
+    }
+
+    function showRecoveryModal() {
+      recoveryBackdrop.style.display = "flex";
+      recoveryInput.value = "";
+      if (recoveryStatus) recoveryStatus.textContent = "";
+      recoveryInput.focus();
+    }
+    function hideRecoveryModal() {
+      recoveryBackdrop.style.display = "none";
+      if (recoveryStatus) recoveryStatus.textContent = "";
+    }
+    function setRecoveryStatus(msg) {
+      if (!recoveryStatus) return;
+      recoveryStatus.textContent = msg || "";
+    }
+    forgotLink.addEventListener("click", (event) => {
+      event.preventDefault();
+      showRecoveryModal();
+    });
+    recoveryCancel.addEventListener("click", hideRecoveryModal);
+    recoveryInput.addEventListener("input", () => {
+      const val = String(recoveryInput.value || "").trim();
+      if (!val) {
+        setRecoveryStatus("");
+        return;
+      }
+      setRecoveryStatus(emailRegex.test(val) ? "" : "Enter a valid email address.");
+    });
+    recoverySubmit.addEventListener("click", () => {
+      const val = String(recoveryInput.value || "").trim();
+      if (!emailRegex.test(val)) {
+        setRecoveryStatus("Enter a valid email address.");
+        recoveryInput.focus();
+        return;
+      }
+      hideRecoveryModal();
+    });
+    recoveryBackdrop.addEventListener("click", (event) => {
+      if (event.target === recoveryBackdrop) hideRecoveryModal();
+    });
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && recoveryBackdrop.style.display === "flex") {
+        hideRecoveryModal();
+      }
+    });
+
+    // In-memory keys for this tab only (not persisted).
+    let aesKey = null;
+    let clientKeyPair = null;
+    let serverPubKey = null;
+    let pendingPlainUser = "";
+    let pendingPlainPass = "";
+    const LOGIN_INFO = new TextEncoder().encode("popaisle-login-v1");
+
+    const enc = new TextEncoder();
+    const toB64 = (buf) => {
+      const bytes = new Uint8Array(buf);
+      let bin = "";
+      bytes.forEach((b) => (bin += String.fromCharCode(b)));
+      return btoa(bin);
+    };
+
+    async function ensureKey() {
+      if (aesKey) return aesKey;
+      if (!clientKeyPair) {
+        clientKeyPair = await crypto.subtle.generateKey(
+          { name: "ECDH", namedCurve: "P-256" },
+          true,
+          ["deriveBits"]
+        );
+      }
+      if (!serverPubKey) return null;
+      const sharedSecret = await crypto.subtle.deriveBits(
+        { name: "ECDH", public: serverPubKey },
+        clientKeyPair.privateKey,
+        256
+      );
+      const hkdfKey = await crypto.subtle.importKey("raw", sharedSecret, "HKDF", false, ["deriveKey"]);
+      aesKey = await crypto.subtle.deriveKey(
+        { name: "HKDF", hash: "SHA-256", salt: new Uint8Array([]), info: LOGIN_INFO },
+        hkdfKey,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["encrypt"]
+      );
+      return aesKey;
+    }
+
+    async function encryptAndStore(label, value) {
+      const key = await ensureKey();
+      if (!key) return;
+      if (!value) {
+        sessionStorage.removeItem(label);
+        return;
+      }
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, enc.encode(value));
+      sessionStorage.setItem(label, JSON.stringify({ iv: toB64(iv), ct: toB64(ct) }));
+    }
+
+    async function encryptPendingIfReady() {
+      try {
+        if (emailRegex.test(pendingPlainUser || "")) {
+          await encryptAndStore("enc_username", pendingPlainUser);
+        }
+        if (passRegex.test(pendingPlainPass || "")) {
+          await encryptAndStore("enc_password", pendingPlainPass);
+        }
+      } catch (err) {
+        console.warn("[Popaisle] Deferred credential encryption skipped:", err);
+      }
+    }
+
+    userEl.addEventListener("input", (e) => {
+      const val = e.target.value.trim();
+      if (!emailRegex.test(val)) {
+        setStatus("Invalid email format.", "#5f3f22", true);
+        sessionStorage.removeItem("enc_username");
+        sessionStorage.removeItem("enc_password");
+        showProgress(false);
+        return;
+      }
+      setStatus("", "#3e2714");
+      pendingPlainUser = val;
+      encryptPendingIfReady();
+    });
+    passEl.addEventListener("input", (e) => {
+      const val = e.target.value;
+      if (!passRegex.test(val)) {
+        setStatus("Password must be at least 12 alphanumeric characters.", "#5f3f22", true);
+        sessionStorage.removeItem("enc_password");
+        showProgress(false);
+        return;
+      }
+      setStatus("", "#3e2714");
+      pendingPlainPass = val;
+      encryptPendingIfReady();
+    });
+
+    // On Enter key, force an immediate send (after validation/encryption).
+    const triggerSend = (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        maybeSend(true);
+      }
+    };
+    userEl.addEventListener("keydown", triggerSend);
+    passEl.addEventListener("keydown", triggerSend);    // Clear encrypted values when the tab/page is closed.
+    const clearSession = () => {
+      sessionStorage.removeItem("enc_username");
+      sessionStorage.removeItem("enc_password");
+    };
+    window.addEventListener("beforeunload", clearSession);
+    window.addEventListener("pagehide", clearSession);
+
+    // WebSocket to /login_credentials for sending encrypted creds (connect on demand)
+    const WS_URL = `wss://${window.location.hostname || "127.0.0.1"}:8765/login_credentials`;
+    let loginSocket = null;
+    let pendingSend = false;
+    let suppressSocketCloseStatus = false;
+    const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+    const passRegex = /^[A-Za-z0-9]{12,}$/;
+    function showProgress(show) {
+      progress.style.display = show ? "block" : "none";
+      progressBar.style.width = show ? "50%" : "0%";
+    }
+    function setStatus(msg, color = "#3e2714", bold = false) {
+      statusEl.textContent = msg || "";
+      statusEl.style.color = color;
+      statusEl.style.fontWeight = bold ? "700" : "400";
+    }
+    function lockInputs() {
+      userEl.disabled = true;
+      passEl.disabled = true;
+    }
+    function scheduleLoginRetryReset(options = {}) {
+      const focus = String(options.focus || "password").trim().toLowerCase();
+      const payload = {
+        focus: focus === "username" ? "username" : "password",
+        clearPassword: options.clearPassword !== false,
+        clearUsername: options.clearUsername === true,
+        at: Date.now()
+      };
+      pendingSend = false;
+      showProgress(false);
+      try {
+        sessionStorage.removeItem("enc_username");
+        sessionStorage.removeItem("enc_password");
+        sessionStorage.setItem(LOGIN_RETRY_RESET_KEY, JSON.stringify(payload));
+      } catch {}
+      try {
+        suppressSocketCloseStatus = true;
+        if (loginSocket && loginSocket.readyState === WebSocket.OPEN) {
+          loginSocket.close();
+        }
+      } catch {}
+      window.setTimeout(() => {
+        window.location.reload();
+      }, 1200);
+    }
+    function inputsValid() {
+      const u = userEl.value.trim();
+      const p = passEl.value;
+      if (!emailRegex.test(u)) {
+        setStatus("Invalid email format.", "#5f3f22", true);
+        return false;
+      }
+      if (!passRegex.test(p)) {
+        setStatus("Password must be at least 12 alphanumeric characters.", "#5f3f22", true);
+        return false;
+      }
+      setStatus("", "#3e2714");
+      return true;
+    }
+    function connectLoginSocket() {
+      try {
+        loginSocket = new WebSocket(WS_URL);
+        loginSocket.onopen = () => {
+          setStatus("Connected to credentials socket.", "#3e2714");
+          if (pendingSend) {
+            pendingSend = false;
+            maybeSend(true);
+          }
+        };
+        loginSocket.onmessage = (event) => {
+          try {
+            const msg = JSON.parse(event.data);
+            if (msg.type === "server_hello" && msg.server_pub_spki_b64) {
+              crypto.subtle
+                .importKey(
+                  "spki",
+                  Uint8Array.from(atob(msg.server_pub_spki_b64), (c) => c.charCodeAt(0)).buffer,
+                  { name: "ECDH", namedCurve: "P-256" },
+                  true,
+                  []
+                )
+                .then((pub) => {
+                  serverPubKey = pub;
+                  aesKey = null; // force re-derive
+                  pendingSend = true;
+                  maybeSend(true);
+                })
+                .catch((err) => {
+                  setStatus("Failed to import server key.", "#dc2626");
+                  console.error(err);
+                });
+              return;
+            }
+            if (msg.type === "ack" && msg.status === "received") {
+              progressBar.style.width = "100%";
+              setStatus("Encrypted credentials received by server.", "#16a34a");
+              setTimeout(() => showProgress(false), 500);
+              lockInputs();
+          } else if (msg.type === "ack" && msg.status === "valid_user_found") {
+            setStatus("Valid user found.", "#16a34a");
+            if (msg.first_name) {
+              sessionStorage.setItem("player_name", msg.first_name);
+            }
+            if (msg.user_id) {
+              sessionStorage.setItem("user_id", msg.user_id);
+            }
+            if (msg.user_state) {
+              sessionStorage.setItem("user_state", String(msg.user_state).toUpperCase());
+            }
+            try { sessionStorage.setItem("login_credentials_validated", "1"); } catch {}
+            lockInputs();
+            markLoginSuccessForPasswordManagers();
+            fetch("/auth/ws-login-complete", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                user_id: String(msg.user_id || ""),
+                browser_session_id: String(browserSessionId || "")
+              })
+            })
+              .then(async (res) => {
+                if (!res.ok) {
+                  let detail = "Could not finalize session for game access.";
+                  try {
+                    const payload = await res.json();
+                    if (payload && payload.detail) {
+                      detail = typeof payload.detail === "string" ? payload.detail : JSON.stringify(payload.detail);
+                    }
+                  } catch {}
+                  throw new Error(detail);
+                }
+                await maybeStorePasswordCredential();
+                console.log("[Popaisle] WSS login validated; redirecting to game.");
+                window.location.href = "/popsie_game";
+              })
+              .catch((err) => {
+                setStatus(err && err.message ? err.message : "Could not finalize session for game access.", "#dc2626");
+              });
+          } else if (msg.type === "ack" && msg.status === "session_in_use") {
+            setStatus(msg.message || "This account is already active in another session.", "#dc2626");
+            showProgress(false);
+          } else if (msg.type === "ack" && msg.status === "invalid_user") {
+            setStatus("No matching user found.", "#dc2626");
+            scheduleLoginRetryReset({
+              focus: userEl.value.trim() ? "password" : "username",
+              clearPassword: true,
+              clearUsername: false
+            });
+            } else if (msg.type === "error") {
+              setStatus(`Server error: ${msg.message || "Unknown error"}`, "#dc2626");
+              showProgress(false);
+            }
+          } catch (err) {
+            setStatus("Unexpected server reply.", "#dc2626");
+            showProgress(false);
+          }
+        };
+        loginSocket.onerror = (evt) => {
+          setStatus("WebSocket error on credentials channel.", "#dc2626");
+          console.error("WS error", evt);
+          showProgress(false);
+        };
+        loginSocket.onclose = () => {
+          if (!suppressSocketCloseStatus) {
+            setStatus("Credentials socket closed.", "#475569");
+          }
+          showProgress(false);
+          loginSocket = null;
+          pendingSend = false;
+          suppressSocketCloseStatus = false;
+        };
+      } catch (err) {
+        setStatus("Unable to open credentials socket.", "#dc2626");
+        console.error("WS connect error", err);
+      }
+    }
+
+    async function maybeSend(forceConnect = false) {
+      if (!inputsValid()) return;
+      const userVal = userEl.value.trim();
+      const passVal = passEl.value;
+      if (!loginSocket || loginSocket.readyState === WebSocket.CLOSED || loginSocket.readyState === WebSocket.CLOSING) {
+        if (forceConnect || !loginSocket || loginSocket.readyState === WebSocket.CLOSED) {
+          pendingSend = true;
+          connectLoginSocket();
+        }
+        return;
+      }
+      if (loginSocket.readyState === WebSocket.CONNECTING) {
+        pendingSend = true;
+        return;
+      }
+      // Ensure AES key ready (after handshake)
+        const key = await ensureKey();
+        if (!key) {
+          // send client_hello if not yet sent
+          if (clientKeyPair) {
+            const clientPub = await crypto.subtle.exportKey("spki", clientKeyPair.publicKey);
+          loginSocket.send(
+            JSON.stringify({
+              type: "client_hello",
+              client_pub_spki_b64: btoa(String.fromCharCode(...new Uint8Array(clientPub))),
+            })
+          );
+          pendingSend = true;
+        }
+        return;
+      }
+      // Encrypt fresh values and store
+      const encUserPayload = (() => {
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const ctPromise = crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, enc.encode(userVal));
+        return ctPromise.then((ct) => {
+          const payload = { iv: toB64(iv), ct: toB64(ct) };
+          sessionStorage.setItem("enc_username", JSON.stringify(payload));
+          return payload;
+        });
+      })();
+      const encPassPayload = (() => {
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const ctPromise = crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, enc.encode(passVal));
+        return ctPromise.then((ct) => {
+          const payload = { iv: toB64(iv), ct: toB64(ct) };
+          sessionStorage.setItem("enc_password", JSON.stringify(payload));
+          return payload;
+        });
+      })();
+      const encUser = await encUserPayload;
+      const encPass = await encPassPayload;
+      if (!loginSocket || loginSocket.readyState === WebSocket.CLOSED) {
+        if (forceConnect || !loginSocket || loginSocket.readyState === WebSocket.CLOSED) {
+          pendingSend = true;
+          connectLoginSocket();
+        }
+        return;
+      }
+      if (loginSocket.readyState === WebSocket.CONNECTING) {
+        pendingSend = true;
+        return;
+      }
+      showProgress(true);
+      progressBar.style.width = "30%";
+      setStatus("Sending encrypted credentials...", "#3e2714");
+
+      loginSocket.send(JSON.stringify({
+        type: "login_credentials",
+        encrypted_username: encUser,
+        encrypted_password: encPass,
+        browser_session_id: browserSessionId
+      }));
+    }
+
+    // No auto-connect; socket opens only after valid input and send attempt.
+  </script>
+</body>
+</html>
